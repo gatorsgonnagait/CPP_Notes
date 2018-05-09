@@ -1,93 +1,131 @@
 #include <iostream>
+
 using namespace std;
 
-class NumericArray{
+static int customerCount = 0;
 
-    private:
-        int size;
-        double * array;
 
-    public:
-
-        explicit NumericArray(int size){
-            this->size = size;
-            array = new double[size]{};// initializes all values to zero
-
-        }
-        ~NumericArray(){ // destructor, used to get rid of dynamically allocated memory
-            delete [] array;
-        }
-
-        void setValue(int index, double value){
-            if (index < size && index >= 0)
-                array[index] = value;
-            else
-                throw out_of_range ("ArrayIndexOutOfBoundsException:   An attempt was made to access an element using an invalid subscript.");
-        }
-
-        double getValue(int index){
-            if (index < size && index >= 0)
-                return array[index];
-            else
-                throw out_of_range ("ArrayIndexOutOfBoundsException:   An attempt was made to access an element using an invalid subscript.");
-        }
-
-        double getMax(){
-            double max = array[0];
-            for (int i = 1; i < size; ++i) {
-                if(array[i]>max){
-                    max = array[i];
-                }
-            }
-            return max;
-        }
-
-        double getMin(){
-            double min = array[0];
-            for (int i = 1; i < size; ++i) {
-                if(array[i]<min){
-                    min = array[i];
-                }
-            }
-            return min;
-        }
-
-        double getAverage(){
-            double sum = 0;
-            for (int i = 1; i < size; ++i) {
-                sum += array[i];
-            }
-            return sum/size;
-        }
-
-        int getSize(){
-            return size;
-        }
-
-        void display(){
-            for (int i = 0; i < size; ++i) {
-                cout << array[i] << " ";
-            }
-            cout<<endl;
-        }
+struct Customer {
+    string accountID;
+    string name;
+    double accountBalance;
 
 };
 
-int main() {
-    NumericArray n1 = NumericArray(7);
+double validateBalance(double balance){
+    while (balance < 0){
+        cout << "Enter Valid Balance greater than 0" << endl;
+        cin >> balance;
+    }
+    return balance;
+}
 
-    cout<< n1.getSize()<<endl;
-    n1.setValue(0, 19);
-    n1.setValue(1, 4);
-    n1.setValue(2, 5);
-    n1.setValue(3, 11);
-    n1.setValue(4, 3);
-    n1.setValue(5, 2);
-    n1.setValue(6, 16);
-    cout<< n1.getValue(4)<<endl;
-    cout<< n1.getMax()<< endl;
-    cout<< n1.getMin()<< endl;
-    cout<< n1.getAverage()<<endl;
-    n1.display();
+bool isValidID(Customer  customerArray[], const string id, int size){
+
+    bool found = false;
+    for (int i = 0; i < size ; ++i) {
+        if(customerArray[i].accountID.compare(id) ==0){
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
+
+void displayCustomer(Customer customerArray[]){
+    cout<< "Enter Customer Number"<<endl;
+    int num;
+    cin >> num;
+    cout<< customerArray[num].accountID<< " " <<customerArray[num].name<< " " << customerArray[num].accountBalance << endl;
+}
+
+Customer createCustomer(){
+    string acc;
+    string name;
+    double balance;
+    cout<< "Enter account ID" << endl;
+    cin>> acc;
+    cout << "Enter name" << endl;
+    cin >> name;
+    cout << "Enter Balance" << endl;
+    cin >> balance;
+    balance = validateBalance(balance);
+    Customer c = {acc, name, balance};
+
+    return c;
+}
+
+
+
+void modifyCustomer(Customer customerArray[], string id, int size){
+    for (int i = 0; i < size ; ++i) {
+        if(customerArray[i].accountID == id){
+
+            cout << "Enter a new name"<< endl;
+            string name;
+            cin >> name;
+            customerArray[i].name = name;
+            cout << "Enter a new balance"<< endl;
+            double balance;
+            cin >> balance;
+            balance = validateBalance(balance);
+            customerArray[i].accountBalance = balance;
+        }
+    }
+}
+
+
+
+void displayAllCustomers(Customer customerArray[], int size){
+    for (int i = 0; i < size ; ++i) {
+        cout<< "Customer Number " << i<< endl;
+        cout<< customerArray[i].accountID<< endl;
+        cout<< customerArray[i].name<< endl;
+        cout<< customerArray[i].accountBalance<< endl;
+        cout<< endl;
+    }
+}
+
+
+int main() {
+    Customer customerArray [20];
+
+    char input = 'n';
+
+    while (input != '0'){
+        cout<< "Press 0 to exit"<< endl;
+        cout << "1: Display data for customer number" << endl;
+        cout << "2: Create new customer" << endl;
+        cout << "3: Modify customer (enter customer number)" << endl;
+        cout << "4: Display all customers" << endl;
+        cin>> input;
+
+        switch (input){
+            case '1' :
+                displayCustomer(customerArray);
+                break;
+            case '2':{
+                customerArray[customerCount] = createCustomer();
+                customerCount++;
+                break;
+            }
+            case '3': {
+                cout << "Enter account ID of customer to modify" << endl;
+                string id;
+                cin >> id;
+                if (isValidID(customerArray, id, customerCount)) {
+                    modifyCustomer(customerArray, id, customerCount);
+                }
+                else
+                    cout << "Not a valid id" << endl;
+                break;
+            }
+            case '4':
+                displayAllCustomers(customerArray, customerCount);
+                break;
+
+        }
+    }
     return 0;
 }
